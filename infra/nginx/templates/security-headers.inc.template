@@ -1,0 +1,16 @@
+# Rendered by the Nginx image (envsubst) to /etc/nginx/conf.d/security-headers.inc and
+# included in every location (add_header in a location replaces inherited headers).
+#
+# CSP: no third-party resources (CLAUDE.md, security 16). react-native-web injects inline
+# styles, so style-src needs 'unsafe-inline'. The only inline script is Expo Router's fixed
+# hydration flag, allowed by its hash; infra/nginx/check-csp.mjs fails the image build if
+# the exported HTML contains any other inline script.
+# HSTS: no includeSubDomains/preload, the domain is shared and temporary.
+
+add_header Strict-Transport-Security "max-age=${HSTS_MAX_AGE}" always;
+add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'sha256-67fhrP0+BkBqmgGGXTtgiVO/9EQs3QruYNU/7fnRkI8='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests" always;
+add_header X-Content-Type-Options "nosniff" always;
+add_header X-Frame-Options "DENY" always;
+add_header Referrer-Policy "no-referrer" always;
+add_header Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()" always;
+add_header Cross-Origin-Opener-Policy "same-origin" always;

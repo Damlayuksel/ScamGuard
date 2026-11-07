@@ -1,0 +1,61 @@
+{
+  "_comment": "Example official / ordinary messages that must give 'no_known_threat'.",
+  "messages": [
+    {
+      "note": "Ziraat resmî bilgilendirme",
+      "text": "Ziraat Bankası: Kartınızla 250,00 TL harcama yapıldı. Detaylar için https://www.ziraatbank.com.tr adresini ziyaret edebilirsiniz.",
+      "expected_level": "no_known_threat"
+    },
+    {
+      "note": "e-Devlet uyarısı, resmî link",
+      "text": "e-Devlet şifrenizi kimseyle paylaşmayın. Giriş yalnızca https://www.turkiye.gov.tr adresinden yapılır.",
+      "expected_level": "no_known_threat"
+    },
+    {
+      "note": "PTT kargo bilgilendirme, resmî domain",
+      "text": "PTT: 123456789 numaralı gönderiniz dağıtıma çıkmıştır. Takip: https://gonderitakip.ptt.gov.tr",
+      "expected_level": "no_known_threat"
+    },
+    {
+      "note": "Yurtiçi kargo resmî",
+      "text": "Yurtiçi Kargo: Gönderiniz teslim edildi. https://www.yurticikargo.com",
+      "expected_level": "no_known_threat"
+    },
+    {
+      "note": "GİB resmî",
+      "text": "Gelir İdaresi Başkanlığı: Beyanname dönemi başlamıştır. https://www.gib.gov.tr",
+      "expected_level": "no_known_threat"
+    },
+    {
+      "note": "Kişisel mesaj, link yok",
+      "text": "Akşam 8'de annemlerde buluşalım mı? Pasta ben alırım.",
+      "expected_level": "no_known_threat"
+    },
+    {
+      "note": "Randevu hatırlatma",
+      "text": "Sayın hastamız, 15 Ekim saat 10:30 diş randevunuzu hatırlatırız.",
+      "expected_level": "no_known_threat"
+    },
+    {
+      "note": "Sıradan site linki",
+      "text": "Şu tarife bak çok güzel olmuş: https://www.yemek-tarifleri.com/menemen",
+      "expected_level": "no_known_threat"
+    },
+    {
+      "note": "Trendyol resmî kampanya",
+      "text": "Trendyol: Sepetindeki ürünlerde indirim başladı! https://www.trendyol.com/sepet",
+      "expected_level": "no_known_threat"
+    },
+    {
+      "note": "Banka uyarısı: kodu paylaşmayın (resmî link ile)",
+      "text": "Akbank: Doğrulama kodunuzu kimseyle paylaşmayın. Bankamız sizden asla şifre istemez. https://www.akbank.com",
+      "expected_level": "no_known_threat"
+    },
+    {
+      "note": "Kısa link resmî adrese gidiyor",
+      "text": "Duyuru: https://bit.ly/edevlet-duyuru",
+      "shortener": "https://www.turkiye.gov.tr/duyurular",
+      "expected_level": "no_known_threat"
+    }
+  ]
+}

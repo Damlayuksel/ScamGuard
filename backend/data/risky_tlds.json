@@ -1,0 +1,9 @@
+{
+  "_comment": "Top-level domains frequently used in phishing/scam campaigns (last label of the public suffix).",
+  "tlds": [
+    "xyz", "top", "shop", "online", "site", "click", "icu", "buzz", "live", "monster",
+    "rest", "cfd", "sbs", "lol", "cyou", "bond", "win", "vip", "work", "link",
+    "fun", "space", "store", "pw", "tk", "ml", "ga", "cf", "gq", "club",
+    "support", "help", "zip", "mov", "quest", "bar", "best", "life", "today", "cam"
+  ]
+}

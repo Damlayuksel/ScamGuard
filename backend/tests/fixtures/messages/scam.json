@@ -1,0 +1,95 @@
+{
+  "_comment": "Example scam messages (domains are fictitious). blacklist: hosts seeded into the USOM blacklist before the scan. expected_level: dangerous | suspicious.",
+  "messages": [
+    {
+      "note": "PTT kargo, adres eksik, marka taklidi + riskli TLD",
+      "text": "PTT: Kargonuz adres bilgileriniz eksik oldugu icin teslim edilemedi. 24 saat icinde guncellemezseniz iade edilecektir: https://ptt-kargo-takip.xyz/tr",
+      "expected_level": "dangerous"
+    },
+    {
+      "note": "Gümrük ücreti, Türkçe karakterli",
+      "text": "Sayın müşterimiz, yurtdışından gelen gönderiniz gümrük ücreti ödenmediği için bekletilmektedir. Ödeme yapınız: https://gumruk-odeme-ptt.top/odeme",
+      "expected_level": "dangerous"
+    },
+    {
+      "note": "e-Devlet iade, tldextract tuzağı",
+      "text": "e-Devlet: 1.450 TL iade alacağınız bulunmaktadır. Son gün bugün! https://turkiye.gov.tr.iade-islemleri.online/basvuru",
+      "expected_level": "dangerous"
+    },
+    {
+      "note": "Banka hesabı askıya alma + yazım hatalı marka",
+      "text": "Z1RAAT: Hesabiniz guvenlik nedeniyle askiya alinacaktir. Hemen dogrulayin: https://z1raat-guvenlik.com/giris",
+      "expected_level": "dangerous"
+    },
+    {
+      "note": "Bonus puan + kart bilgisi",
+      "text": "Garanti BBVA: 750 TL bonus puaniniz yuklendi! Kullanmak icin kart numaranizi ve son kullanma tarihini girin: http://garantibonus-kazan.click",
+      "expected_level": "dangerous"
+    },
+    {
+      "note": "Kara listedeki domain, metin masum",
+      "text": "Merhaba, şu ürüne bir bak: https://www.cok-ucuz-firsat.com/urun/123",
+      "blacklist": ["cok-ucuz-firsat.com"],
+      "expected_level": "dangerous"
+    },
+    {
+      "note": "Kara listedeki alt alan adı (ortak platformda)",
+      "text": "Faturanız hazır, görüntülemek için: https://fatura-goruntule.github.io/pdf",
+      "blacklist": ["fatura-goruntule.github.io"],
+      "expected_level": "dangerous"
+    },
+    {
+      "note": "Ham IP adresi + doğrulama kodu (yol içindeki marka adı değerlendirilmez)",
+      "text": "Hesabınıza yeni cihazdan giriş yapıldı. Siz değilseniz size gelen doğrulama kodunu bu sayfaya girin: http://203.0.113.45/akbank/login",
+      "expected_level": "suspicious"
+    },
+    {
+      "note": "Çekiliş, link yok",
+      "text": "Tebrikler! Trendyol çekilişinde iPhone 16 KAZANDINIZ. Hediyenizi almak için IBAN numaranızı bu numaraya gönderin.",
+      "expected_level": "suspicious"
+    },
+    {
+      "note": "Sahte savcı, link yok",
+      "text": "Ben Cumhuriyet Savcılığından arıyorum, adınız bir soruşturmada geçiyor. Hesabınızdaki parayı güvenli hesaba aktarmanız gerekiyor, IBAN bilgisini iletiyorum.",
+      "expected_level": "suspicious"
+    },
+    {
+      "note": "Trafik cezası, riskli TLD",
+      "text": "Trafik cezası borcunuz bulunmaktadır. 48 saat içinde ödeme yapmazsanız icra işlemi başlatılacaktır. Detay: https://ceza-sorgula.site",
+      "expected_level": "suspicious"
+    },
+    {
+      "note": "Kripto yatırım",
+      "text": "Günde 5.000 TL kazanç! Ücretsiz eğitim için hemen linke tıklayın: https://kripto-kazanc-firsat.shop",
+      "expected_level": "suspicious"
+    },
+    {
+      "note": "Punycode taklit",
+      "text": "VakifBank: Kartınız bloke edilmiştir. Kaldırmak için: https://xn--vakfbank-vkb.com/destek",
+      "expected_level": "dangerous"
+    },
+    {
+      "note": "Hat kapatma + şifre",
+      "text": "Turkcell: Hattınız 24 saat içinde kapatılacaktır. Engeli kaldırmak için şifrenizi güncelleyin: https://turkcell-hat-islemleri.net",
+      "expected_level": "dangerous"
+    },
+    {
+      "note": "Çok fazla alt alan adı + @ hilesi",
+      "text": "Hesap bildiriminiz: https://www.isbank.com.tr@a.b.c.d.hesap-dogrula.info/giris",
+      "expected_level": "suspicious"
+    },
+    {
+      "note": "Çözülemeyen kısa link + iade",
+      "text": "SGK: 2.300 TL iade hakkınız var, son gün yarın. Başvuru: https://bit.ly/sgk-iade",
+      "shortener": "unresolved",
+      "expected_level": "suspicious"
+    },
+    {
+      "note": "Kısa link kara listedeki adrese gidiyor",
+      "text": "Kargonuz için: https://tinyurl.com/kargo-teslim",
+      "shortener": "https://kargo-teslim-merkezi.com/form",
+      "blacklist": ["kargo-teslim-merkezi.com"],
+      "expected_level": "dangerous"
+    }
+  ]
+}

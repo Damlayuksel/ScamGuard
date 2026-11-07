@@ -1,0 +1,157 @@
+# Production stack. Run from the repository root:
+#   docker compose -f infra/docker-compose.prod.yml --env-file infra/.env.prod up -d --build
+# (infra/scripts/deploy.sh does this.) See infra/README.md for the first setup.
+
+name: scamshield-prod
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+x-backend: &backend
+  build:
+    context: ../backend
+    args:
+      INSTALL_DEV: "false"
+  image: scamshield-backend:prod
+  env_file:
+    - .env.prod
+  environment:
+    ENV: prod
+    DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+    REDIS_URL: redis://redis:6379/0
+    CORS_ORIGINS: https://${DOMAIN}
+    TRUSTED_PROXIES: ${NGINX_IP}
+  depends_on:
+    db:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+  restart: unless-stopped
+  logging: *logging
+  networks:
+    - internal
+
+services:
+  api:
+    <<: *backend
+    # X-Forwarded-For is trusted only from the Nginx container (fixed address below).
+    command:
+      - uvicorn
+      - app.main:app
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8000"
+      - --workers
+      - "2"
+      - --proxy-headers
+      - --forwarded-allow-ips
+      - ${NGINX_IP}
+      - --no-server-header
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import sys, urllib.request; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health', timeout=3).status == 200 else 1)"
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  worker:
+    <<: *backend
+    command: ["python", "-m", "app.worker.main"]
+
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+    logging: *logging
+    networks:
+      - internal
+
+  redis:
+    image: redis:7
+    # Cache only (rebuilt from Postgres by the worker). volatile-lru evicts only keys with
+    # a TTL (rate limits, RDAP cache) and never the blacklist hash.
+    command:
+      - redis-server
+      - --maxmemory
+      - 512mb
+      - --maxmemory-policy
+      - volatile-lru
+      - --save
+      - ""
+      - --appendonly
+      - "no"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+    logging: *logging
+    networks:
+      - internal
+
+  web:
+    build:
+      context: ..
+      dockerfile: infra/nginx/Dockerfile
+    image: scamshield-web:prod
+    environment:
+      DOMAIN: ${DOMAIN}
+      HSTS_MAX_AGE: ${HSTS_MAX_AGE:-300}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - certbot-conf:/etc/letsencrypt
+      - certbot-www:/var/www/certbot
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+    logging: *logging
+    networks:
+      internal:
+        ipv4_address: ${NGINX_IP}
+
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - certbot-conf:/etc/letsencrypt
+      - certbot-www:/var/www/certbot
+    entrypoint:
+      - /bin/sh
+      - -c
+      - "trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot --quiet; sleep 12h & wait $${!}; done"
+    restart: unless-stopped
+    logging: *logging
+    networks:
+      - internal
+
+networks:
+  internal:
+    ipam:
+      config:
+        - subnet: ${INTERNAL_SUBNET}
+
+volumes:
+  db-data:
+  certbot-conf:
+  certbot-www:

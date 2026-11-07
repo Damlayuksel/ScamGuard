@@ -1,0 +1,10 @@
+# Build context of the production web image (repository root). Only mobile/ and
+# infra/nginx/ are needed; never send secrets, git history or local builds.
+*
+!mobile/
+!infra/nginx/
+mobile/node_modules/
+mobile/dist/
+mobile/.expo/
+mobile/.env*
+!mobile/.env.example

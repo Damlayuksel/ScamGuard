@@ -1,0 +1,106 @@
+name: Deploy
+
+# Deploys main to the production server after CI has passed on it.
+# Setup (secrets, server key, environment): infra/README.md, "Otomatik deploy".
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One deploy at a time; a newer pending run replaces an older pending one.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    # Only after a successful CI run for a push to main, or a manual run on main.
+    if: >-
+      (github.event_name == 'workflow_run'
+        && github.event.workflow_run.conclusion == 'success'
+        && github.event.workflow_run.event == 'push')
+      || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    # Secrets and the DEPLOY_URL variable are repository-level settings: GitHub
+    # environments are not available for private repositories on the free plan.
+    env:
+      # The exact commit CI tested (manual runs: the current main).
+      DEPLOY_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+      DEPLOY_URL: ${{ vars.DEPLOY_URL }}
+
+    steps:
+      - name: Check configuration
+        env:
+          HAS_HOST: ${{ secrets.DEPLOY_HOST != '' }}
+          HAS_USER: ${{ secrets.DEPLOY_USER != '' }}
+          HAS_KEY: ${{ secrets.DEPLOY_SSH_KEY != '' }}
+          HAS_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS != '' }}
+        run: |
+          missing=""
+          [ "$HAS_HOST" = "true" ] || missing="$missing DEPLOY_HOST"
+          [ "$HAS_USER" = "true" ] || missing="$missing DEPLOY_USER"
+          [ "$HAS_KEY" = "true" ] || missing="$missing DEPLOY_SSH_KEY"
+          [ "$HAS_KNOWN_HOSTS" = "true" ] || missing="$missing DEPLOY_KNOWN_HOSTS"
+          [ -n "$DEPLOY_URL" ] || missing="$missing DEPLOY_URL(variable)"
+          if [ -n "$missing" ]; then
+            echo "::error::Missing production settings:$missing (see infra/README.md)"
+            exit 1
+          fi
+
+      - name: Configure SSH
+        env:
+          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          umask 077
+          # DEPLOY_SSH_KEY may be the key file as is or a single base64 line
+          # ("base64 -w0 <key file>"), which survives copy/paste unchanged.
+          # Windows line endings from copy/paste are removed.
+          if printf '%s' "$SSH_KEY" | grep -q -- '-----BEGIN'; then
+            printf '%s\n' "$SSH_KEY" | tr -d '\r' > ~/.ssh/deploy_key
+          else
+            printf '%s' "$SSH_KEY" | tr -d '\r\n ' | base64 -d > ~/.ssh/deploy_key 2>/dev/null || true
+          fi
+          if ! ssh-keygen -y -f ~/.ssh/deploy_key >/dev/null 2>&1; then
+            echo "::error::DEPLOY_SSH_KEY is not a valid private key. Re-create it from 'base64 -w0 /home/deploy/.ssh/github_actions' (see infra/README.md)."
+            exit 1
+          fi
+          # Pinned host key: never trust a host key seen for the first time.
+          printf '%s\n' "$KNOWN_HOSTS" | tr -d '\r' > ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Deploy ${{ env.DEPLOY_SHA }}
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
+        run: >
+          ssh -i ~/.ssh/deploy_key -p "${DEPLOY_PORT:-22}"
+          -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes
+          -o ServerAliveInterval=30
+          "$DEPLOY_USER@$DEPLOY_HOST" "deploy $DEPLOY_SHA"
+
+      - name: Health check
+        run: |
+          for attempt in $(seq 1 24); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 "$DEPLOY_URL/api/v1/health" || true)
+            if [ "$code" = "200" ]; then
+              echo "Healthy after $attempt check(s)"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "::error::$DEPLOY_URL/api/v1/health did not return 200 within 2 minutes"
+          exit 1
+
+      - name: Remove SSH key
+        if: always()
+        run: rm -f ~/.ssh/deploy_key

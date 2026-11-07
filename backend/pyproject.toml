@@ -1,0 +1,50 @@
+[project]
+name = "scamshield-backend"
+version = "0.1.0"
+description = "Rule-based scam detection API (no AI/ML)."
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "pydantic>=2.9",
+    "pydantic-settings>=2.7",
+    "sqlalchemy[asyncio]>=2.0.36",
+    "asyncpg>=0.30",
+    "redis>=5.2",
+    "httpx>=0.28",
+    "apscheduler>=3.10,<4",
+    "alembic>=1.14",
+    "tldextract>=5.1",
+    "rapidfuzz>=3.10",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "pytest-asyncio>=1.1",
+    "respx>=0.22",
+    "ruff>=0.8",
+]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "S", "ASYNC", "RUF"]
+# User-facing text is Turkish; dotless/dotted I are real letters, not confusables.
+allowed-confusables = ["ı", "İ"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "S105", "S106", "RUF001"]
+# Intentionally lists look-alike letters from other scripts.
+"app/core/textnorm.py" = ["RUF001"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "session"
+asyncio_default_test_loop_scope = "session"

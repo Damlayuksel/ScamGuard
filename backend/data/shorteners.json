@@ -1,0 +1,9 @@
+{
+  "_comment": "Link shortener hosts. Links on these hosts are resolved with safe_fetch and the final address is scanned again.",
+  "hosts": [
+    "bit.ly", "bitly.com", "tinyurl.com", "cutt.ly", "t.ly", "is.gd", "v.gd", "rb.gy",
+    "shorturl.at", "ow.ly", "goo.gl", "t.co", "buff.ly", "tiny.cc", "s.id", "bl.ink",
+    "rebrand.ly", "lnkd.in", "shorte.st", "adf.ly", "tr.ee", "short.gy", "urlkisalt.com",
+    "kisa.link", "qr.ae", "u.to", "clck.ru", "2u.pw", "bitly.ws"
+  ]
+}
