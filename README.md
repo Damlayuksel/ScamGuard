@@ -1,10 +1,20 @@
 # ScamGuard
 
-**Detect Scams. Stay Safe.**
+<p align="center">
+  <strong>Detect Scams. Stay Safe.</strong><br/>
+  Rule-based scam detection for suspicious messages and links.
+</p>
 
-ScamGuard is a rule-based cybersecurity application designed to help users in Türkiye identify potentially fraudulent messages, suspicious links, and suspicious phone numbers.
+<p align="center">
+  <img src="docs/images/scamguard-mobile-preview.png" alt="ScamGuard mobile app preview showing message scanning and risk analysis" width="48%"/>
+  <img src="docs/images/scamguard-caller-protection-concept.png" alt="ScamGuard suspicious caller protection design concept" width="48%"/>
+</p>
 
-The project focuses on transparent, rule-based analysis rather than AI-based classification.
+<p align="center">
+  <em>Left: mobile app UI concept. Right: planned suspicious caller protection concept (not implemented).</em>
+</p>
+
+ScamGuard is a rule-based cybersecurity application designed to help users in Türkiye identify potentially fraudulent messages and suspicious links. It uses transparent security rules rather than AI-based classification.
 
 ## Features
 
